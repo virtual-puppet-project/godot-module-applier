@@ -19,6 +19,7 @@ MODULES_FORMAT = "{}/modules"
 THIRDPARTY_FORMAT = "{}/thirdparty"
 PATCHES_FORMAT = "{}/patches"
 
+MODULES_FILE = "modules_file.txt"
 APPLIED_MODULES_FILE = ".applied_modules"
 
 
@@ -266,7 +267,7 @@ def main() -> None:
     debug_parser.set_defaults(func=debug_script)
 
     apply_parser = subparsers.add_parser("apply", help="Apply modules")
-    apply_parser.add_argument("--modules-file", type=str, default="modules_file.txt",
+    apply_parser.add_argument("--modules-file", type=str, default=MODULES_FILE,
                               help="Path to a file containing paths to module repos")
     apply_parser.add_argument("--force", "-f", type=bool, default=False,
                               help="Whether to overwrite any existing modules or thirdparty files")
