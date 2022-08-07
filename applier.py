@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import os
+import types
+import sys
 import argparse
 import subprocess
 import shutil
@@ -21,6 +23,8 @@ PATCHES_FORMAT = "{}/patches"
 
 MODULES_FILE = "modules_file.txt"
 APPLIED_MODULES_FILE = ".applied_modules"
+
+HELPER_SCRIPT_FILE = "helper_script.py"
 
 
 class DirUtil(object):
@@ -140,6 +144,28 @@ class GitUtil(object):
                 ["git", "apply", "--ignore-space-change", "--ignore-whitespace", "{}/{}".format(patches_dir, file)], cwd=godot_dir)
 
 
+def execute_helper_script(path: str, func_name: str, godot_root_dir: str = DirUtil.get_godot_dir()) -> None:
+    """
+    Ultra dangerous way of executing a module's helper script
+    """
+    script_file = open("path", "r")
+
+    try:
+        code = compile(script_file.read(), path, "exec")
+
+        # The name doesn't really matter, it just needs to be unique
+        mod = types.ModuleTypes(path)
+        exec(code, mod.__dict__)
+
+        sys.modules[path] = mod
+
+        entrypoint = getattr(mod, func_name)
+        if entrypoint is not None:
+            entrypoint(godot_root_dir)
+    except Exception as e:
+        print(e)
+
+
 def apply(args: argparse.Namespace) -> None:
     """
     Clones all directories into a temp folder and copies the modules, copies any
@@ -210,6 +236,9 @@ def apply(args: argparse.Namespace) -> None:
         patches_dir = PATCHES_FORMAT.format(repo_dir)
         if DirUtil.dir_exists(patches_dir):
             GitUtil.apply_patches(patches_dir, godot_dir)
+
+        if DirUtil.file_exists(HELPER_SCRIPT_FILE):
+            execute_helper_script(HELPER_SCRIPT_FILE)
 
     DirUtil.rm_rf(temp_dir)
 
@@ -288,4 +317,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
