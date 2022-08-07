@@ -97,7 +97,7 @@ class GitUtil(object):
         if not DirUtil.dir_exists(dir):
             return False
 
-        params: list = ["git", "clone"]
+        params: list = ["git", "clone", "--recursive"]
 
         if not branch == "":
             params.append("-b")
