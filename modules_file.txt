@@ -1,0 +1,6 @@
+https://github.com/virtual-puppet-project/godot-patches.git
+https://github.com/you-win/godot-stdout-stderr-intercept.git
+https://github.com/you-win/godot-toml.git
+https://github.com/you-win/youwin-godot-module.git
+https://github.com/virtual-puppet-project/vpuppr-godot-modules.git
+
