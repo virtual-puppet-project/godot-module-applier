@@ -25,6 +25,7 @@ MODULES_FILE = "modules_file.txt"
 APPLIED_MODULES_FILE = ".applied_modules"
 
 HELPER_SCRIPT_FILE = "helper_script.py"
+HELPER_SCRIPT_RUN_FUNC = "run"
 
 
 class DirUtil(object):
@@ -46,7 +47,7 @@ class DirUtil(object):
             yield os.fsdecode(dir)
 
     @staticmethod
-    def get_godot_dir() -> str:
+    def get_godot_dir(args: argparse.Namespace) -> str:
         """
         Actually only gets the directory of this script but is good enough.
         """
@@ -144,7 +145,7 @@ class GitUtil(object):
                 ["git", "apply", "--ignore-space-change", "--ignore-whitespace", "{}/{}".format(patches_dir, file)], cwd=godot_dir)
 
 
-def execute_helper_script(path: str, func_name: str, godot_root_dir: str = DirUtil.get_godot_dir()) -> None:
+def execute_helper_script(path: str, args: argparse.Namespace, func_name: str = HELPER_SCRIPT_RUN_FUNC) -> None:
     """
     Ultra dangerous way of executing a module's helper script
     """
@@ -161,7 +162,7 @@ def execute_helper_script(path: str, func_name: str, godot_root_dir: str = DirUt
 
         entrypoint = getattr(mod, func_name)
         if entrypoint is not None:
-            entrypoint(godot_root_dir)
+            entrypoint(DirUtil.get_godot_dir(args))
     except Exception as e:
         print(e)
 
@@ -178,7 +179,7 @@ def apply(args: argparse.Namespace) -> None:
     if not DirUtil.file_exists(modules_file):
         raise Exception("path {} not found".format(modules_file))
 
-    godot_dir = args.godot_directory if not args.godot_directory is None else DirUtil.get_godot_dir()
+    godot_dir = DirUtil.get_godot_dir(args)
 
     if not DirUtil.dir_exists(godot_dir):
         raise Exception("path {} not found".format(godot_dir))
@@ -238,7 +239,7 @@ def apply(args: argparse.Namespace) -> None:
             GitUtil.apply_patches(patches_dir, godot_dir)
 
         if DirUtil.file_exists(HELPER_SCRIPT_FILE):
-            execute_helper_script(HELPER_SCRIPT_FILE)
+            execute_helper_script(HELPER_SCRIPT_FILE, args)
 
     DirUtil.rm_rf(temp_dir)
 
@@ -259,8 +260,7 @@ def clean(args: argparse.Namespace) -> None:
     if not DirUtil.file_exists(APPLIED_MODULES_FILE):
         raise Exception("{} does not exist".format(APPLIED_MODULES_FILE))
 
-    GitUtil.git_restore_dir(
-        args.godot_directory if not args.godot_directory is None else DirUtil.get_godot_dir())
+    GitUtil.git_restore_dir(DirUtil.get_godot_dir(args))
 
     applied_modules_handle = open(APPLIED_MODULES_FILE, "r")
 
