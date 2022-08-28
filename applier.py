@@ -203,7 +203,7 @@ def apply(args: argparse.Namespace) -> None:
 
     modules_file_content = modules_file_handle.read()
     for line in modules_file_content.splitlines():
-        if line.startswith("#"):
+        if line.startswith("#") or len(line) == 0:
             continue
 
         repo: str = line
@@ -238,8 +238,9 @@ def apply(args: argparse.Namespace) -> None:
         if DirUtil.dir_exists(patches_dir):
             GitUtil.apply_patches(patches_dir, godot_dir)
 
-        if DirUtil.file_exists(HELPER_SCRIPT_FILE):
-            execute_helper_script(HELPER_SCRIPT_FILE, args)
+        helper_script_path = "{}/{}".format(repo_dir, HELPER_SCRIPT_FILE)
+        if DirUtil.file_exists(helper_script_path):
+            execute_helper_script(helper_script_path, args)
 
     DirUtil.rm_rf(temp_dir)
 
